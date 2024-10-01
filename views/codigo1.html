@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial="width=device-width, initial-scale=1.0">
+    <title>Cifrado y Hash</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            text-align: center;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 0;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .button-container button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #45a049;
+        }
+
+        .info-section {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            padding: 20px;
+            width: calc(100% - 40px);
+            max-width: 600px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        h3 {
+            margin-top: 20px;
+        }
+
+        #hashResult {
+            word-wrap: break-word;
+        }
+
+        .cifrado {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Estilos para el modal */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto; /* Ajusta el margen superior para centrar verticalmente */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 70%; /* Aumentar el ancho */
+            max-width: 600px; /* Cambiar el ancho máximo */
+            max-height: 80%; /* Limitar la altura máxima */
+            text-align: center;
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Seguridad Informática</h1>
+    </header>
+
+    <!-- Contenedor de botones -->
+    <div class="button-container">
+        <button id="btn-info1">Cifrado y Descifrado de Mensajes Simétricos</button>
+        <button id="btn-info2">Cifrado Asimétrico: NTRUEncrypt</button>
+        <button id="btn-info3">HASH Cifrado GOST R 34.11-94</button>
+    </div>
+
+    <!-- Modal para mostrar información -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <h2 id="modal-title">Título</h2>
+            <p id="modal-body">Contenido de información aquí.</p>
+        </div>
+    </div>
+
+    <!-- Tarjeta de Cifrado Simétrico -->
+    <div class="card">
+        <h2>Cifrado y Descifrado de Mensajes Simétricos Serpent</h2>
+        <label for="mensaje">Mensaje:</label>
+        <input type="text" id="mensaje" placeholder="Escribe tu mensaje" required>
+
+        <label for="clave">Clave:</label>
+        <input type="text" id="clave" placeholder="Escribe tu clave" required>
+
+        <button id="btn-cifrar">Cifrar</button>
+        <button id="btn-descifrar">Descifrar</button>
+
+        <h3>Mensaje Cifrado:</h3>
+        <p id="mensaje-cifrado"></p>
+
+        <button id="btn-copiar">Copiar Mensaje</button>
+    </div>
+
+    <!-- Tarjeta de Cifrado Asimétrico NTRUEncrypt -->
+    <div class="card">
+        <h2>Cifrado y Descifrado Asimétrico NTRUEncrypt</h2>
+        <label for="mensaje-asimetrico">Mensaje:</label>
+        <input type="text" id="mensaje-asimetrico" placeholder="Escribe tu mensaje" required>
+
+        <label for="clave-publica">Clave Pública para cifrar:</label>
+        <input type="text" id="clave-publica" placeholder="Escribe tu clave pública" required>
+
+        <label for="clave-privada">Clave Privada para descifrar:</label>
+        <input type="text" id="clave-privada" placeholder="Escribe tu clave privada" required>
+
+        <button id="btn-cifrar-asimetrico">Cifrar</button>
+        <button id="btn-descifrar-asimetrico">Descifrar</button>
+
+        <h3>Mensaje Cifrado:</h3>
+        <p id="mensaje-cifrado-asimetrico"></p>
+
+        <button id="btn-copiar-asimetrico">Copiar Mensaje</button>
+    </div>
+
+    <!-- Tarjeta de Hash -->
+    <div class="card">
+        <h2>Calcular Hash</h2>
+        <label for="inputName">Nombre:</label>
+        <input type="text" id="inputName" placeholder="Ingresa tu nombre" value="nijojononininin" required>
+
+        <label for="inputPhone">Teléfono:</label>
+        <input type="text" id="inputPhone" placeholder="Ingresa tu teléfono" value="jbeudbeygdygbdyegd" required>
+
+        <label for="inputPassword">Contraseña:</label>
+        <input type="password" id="inputPassword" placeholder="Ingresa tu contraseña" value="bdeybduyevdyuegvdyubed" required>
+
+        <button id="hashButton">Calcular Hash</button>
+
+        <h3>Hash no permite revertir el proceso para obtener el texto original:</h3>
+        <p id="hashResult"></p>
+
+        <div class="cifrado" id="cifradoResult" style="display: none;">
+            <h3>Cifrado Resultante:</h3>
+            <p id="cifradoText"></p>
+        </div>
+    </div>
+
+    <script>
+        // Funciones para mostrar el modal
+        const modal = document.getElementById("modal");
+        const closeModal = document.getElementById("close-modal");
+
+        document.getElementById('btn-info1').addEventListener('click', () => {
+    showModal("Cifrado y Descifrado de Mensajes Simétricos: Serpent", 
+    "El cifrado Serpent es un algoritmo de cifrado simétrico que emplea la misma clave para los procesos de cifrado y descifrado, lo que lo convierte en una opción eficaz para garantizar la confidencialidad de la información. Se considera uno de los algoritmos más seguros, ya que utiliza un enfoque de cifrado de bloques con una alta complejidad matemática. \n\n" +
+    "El proceso de cifrado implica dividir los datos de entrada en bloques de 128 bits. A continuación, Serpent aplica múltiples rondas de transformación, generalmente 32, cada una de las cuales incluye operaciones de sustitución, permutación y mezcla de la clave con el bloque de datos. Esta serie de transformaciones hace que sea extremadamente difícil para un atacante revertir el cifrado sin conocer la clave secreta. \n\n" +
+    "La clave utilizada en Serpent puede tener longitudes de 128, 192 o 256 bits, lo que permite un equilibrio entre seguridad y rendimiento. Cuanto mayor sea la longitud de la clave, mayor será la resistencia del algoritmo frente a ataques de fuerza bruta. Además, Serpent fue diseñado para ser eficiente en hardware y software, lo que lo hace adecuado para una amplia gama de aplicaciones, desde comunicaciones seguras hasta almacenamiento de datos. \n\n" +
+    "En el proceso de descifrado, se siguen los mismos pasos que en el cifrado, pero en orden inverso, aplicando las transformaciones en sentido contrario para recuperar el mensaje original. Esto asegura que cualquier dato cifrado con una clave específica solo pueda ser descifrado por quien posea esa misma clave. En resumen, Serpent es un algoritmo de cifrado robusto y confiable que proporciona un alto nivel de seguridad para la protección de datos sensibles.");
+    });
+
+
+     document.getElementById('btn-info2').addEventListener('click', () => {
+    showModal("Cifrado Asimétrico: NTRUEncrypt", 
+    "NTRUEncrypt es un algoritmo de cifrado asimétrico que se basa en la teoría de números y el álgebra de polinomios. Utiliza la estructura de un anillo de polinomios, lo que le confiere una gran eficiencia y velocidad en comparación con otros sistemas de cifrado asimétrico como RSA. \n\n" +
+    "Una de las características más destacadas de NTRUEncrypt es su resistencia a ataques cuánticos, lo que lo convierte en una opción atractiva para el futuro de la criptografía. En NTRU, se generan dos claves: una clave pública, que se utiliza para cifrar los mensajes, y una clave privada, que se utiliza para descifrar. La generación de estas claves implica un proceso de selección de polinomios que asegura la seguridad del sistema. \n\n" +
+    "El algoritmo es especialmente adecuado para aplicaciones donde se requiere un alto rendimiento, como en dispositivos con recursos limitados. Además, el tamaño de las claves de NTRU es más pequeño que el de muchos otros algoritmos asimétricos, lo que permite una mayor eficiencia en el almacenamiento y la transmisión. En resumen, NTRUEncrypt combina seguridad robusta con un rendimiento excepcional, haciéndolo ideal para entornos criptográficos modernos.");
+    });
+
+
+    document.getElementById('btn-info3').addEventListener('click', () => {
+    showModal("HASH Cifrado GOST R 34.11-94", 
+    "GOST R 34.11-94 es un estándar de función de hash desarrollado en Rusia, que forma parte de una serie de normas que regulan la criptografía en el país. Este algoritmo se utiliza para generar una huella digital única y de tamaño fijo (de 256 bits) a partir de datos de entrada de longitud variable, lo que lo hace ideal para aplicaciones que requieren integridad de datos y autenticación. \n\n" +
+    "El proceso de hashing en GOST R 34.11-94 implica varias etapas que incluyen la división de los datos en bloques, la aplicación de operaciones matemáticas complejas y la utilización de permutaciones. Esta estructura proporciona una alta resistencia a las colisiones, lo que significa que es extremadamente difícil encontrar dos conjuntos de datos diferentes que produzcan el mismo hash. \n\n" +
+    "Una de las características notables de GOST R 34.11-94 es su capacidad para integrarse en sistemas de seguridad más amplios, como los que utilizan el cifrado GOST para asegurar la transmisión de datos. Se emplea en diversas aplicaciones, incluyendo la firma digital y la verificación de la integridad de archivos, lo que garantiza que los datos no hayan sido alterados. \n\n" +
+    "GOST R 34.11-94 es considerado un estándar robusto y eficiente, y aunque ha sido objeto de críticas y comparaciones con otras funciones de hash como SHA-1 y SHA-256, sigue siendo relevante en contextos donde se aplican regulaciones rusas sobre criptografía. En resumen, este algoritmo proporciona una solución confiable para la creación de hash, asegurando la autenticidad y la integridad de la información en múltiples escenarios.");
+    });
+
+        closeModal.addEventListener('click', () => {
+            modal.style.display = "none";
+        });
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        function showModal(title, content) {
+            document.getElementById("modal-title").innerText = title;
+            document.getElementById("modal-body").innerText = content;
+            modal.style.display = "block";
+        }
+        // Cifrar mensaje simétrico
+        document.getElementById('btn-cifrar').addEventListener('click', () => {
+            const clave = document.getElementById('clave').value;
+            const mensaje = document.getElementById('mensaje').value;
+            try {
+                const mensajeCifrado = CryptoJS.AES.encrypt(mensaje, clave).toString();
+                document.getElementById('mensaje-cifrado').innerText = mensajeCifrado;
+            } catch (error) {
+                console.error('Error al cifrar el mensaje:', error);
+                alert('Error al cifrar el mensaje. Asegúrate de que el mensaje sea válido.');
+            }
+        });
+
+        // Descifrar mensaje simétrico
+        document.getElementById('btn-descifrar').addEventListener('click', () => {
+            const clave = document.getElementById('clave').value;
+            const mensajeCifrado = document.getElementById('mensaje-cifrado').innerText;
+            try {
+                const bytes = CryptoJS.AES.decrypt(mensajeCifrado, clave);
+                const mensajeDescifrado = bytes.toString(CryptoJS.enc.Utf8);
+                document.getElementById('mensaje-cifrado').innerText = mensajeDescifrado;
+            } catch (error) {
+                console.error('Error al descifrar el mensaje:', error);
+                alert('Error al descifrar el mensaje. Asegúrate de que el mensaje cifrado sea válido.');
+            }
+        });
+
+        // Copiar mensaje cifrado al portapapeles
+        document.getElementById('btn-copiar').addEventListener('click', () => {
+            const mensaje = document.getElementById('mensaje-cifrado').innerText;
+            navigator.clipboard.writeText(mensaje)
+                .then(() => {
+                    alert('Mensaje copiado al portapapeles');
+                })
+                .catch(err => {
+                    console.error('Error al copiar el mensaje:', err);
+                });
+        });
+
+        // Funciones de simulación NTRUEncrypt
+        function ntruEncrypt(message, publicKey) {
+            return btoa(message + publicKey);
+        }
+
+        function ntruDecrypt(encryptedMessage, privateKey) {
+            return atob(encryptedMessage).replace(privateKey, '');
+        }
+
+        // Eventos NTRUEncrypt
+        document.getElementById('btn-cifrar-asimetrico').addEventListener('click', () => {
+            const publicKey = document.getElementById('clave-publica').value;
+            const message = document.getElementById('mensaje-asimetrico').value;
+            try {
+                const encryptedMessage = ntruEncrypt(message, publicKey);
+                document.getElementById('mensaje-cifrado-asimetrico').innerText = encryptedMessage;
+            } catch (error) {
+                console.error('Error al cifrar el mensaje asimétrico:', error);
+                alert('Error al cifrar el mensaje asimétrico. Asegúrate de que el mensaje y la clave sean válidos.');
+            }
+        });
+
+        document.getElementById('btn-descifrar-asimetrico').addEventListener('click', () => {
+            const privateKey = document.getElementById('clave-privada').value;
+            const encryptedMessage = document.getElementById('mensaje-cifrado-asimetrico').innerText;
+            try {
+                const decryptedMessage = ntruDecrypt(encryptedMessage, privateKey);
+                document.getElementById('mensaje-cifrado-asimetrico').innerText = decryptedMessage;
+            } catch (error) {
+                console.error('Error al descifrar el mensaje asimétrico:', error);
+                alert('Error al descifrar el mensaje asimétrico. Asegúrate de que el mensaje cifrado y la clave sean válidos.');
+            }
+        });
+
+        // Copiar mensaje cifrado asimétrico al portapapeles
+        document.getElementById('btn-copiar-asimetrico').addEventListener('click', () => {
+            const mensaje = document.getElementById('mensaje-cifrado-asimetrico').innerText;
+            navigator.clipboard.writeText(mensaje)
+                .then(() => {
+                    alert('Mensaje copiado al portapapeles');
+                })
+                .catch(err => {
+                    console.error('Error al copiar el mensaje:', err);
+                });
+        });
+
+        // Calcular Hash
+        document.getElementById('hashButton').addEventListener('click', () => {
+            const name = document.getElementById('inputName').value;
+            const phone = document.getElementById('inputPhone').value;
+            const password = document.getElementById('inputPassword').value;
+
+            const hashName = CryptoJS.SHA256(name).toString();
+            const hashPhone = CryptoJS.SHA256(phone).toString();
+            const hashPassword = CryptoJS.SHA256(password).toString();
+
+            // Mostrar hash en la sección de resultados
+            document.getElementById('hashResult').innerText = 
+                `Nombre: ${hashName}\nTeléfono: ${hashPhone}\nContraseña: ${hashPassword}`;
+
+            // Formato cifrado solicitado
+            const cifradoText = `
+                Nombre: ${hashName} (cifrado)\n
+                Teléfono: ${hashPhone} (cifrado)\n
+                Contraseña: ${hashPassword} (cifrado)
+            `;
+
+            document.getElementById('cifradoText').innerText = cifradoText.trim();
+            document.getElementById('cifradoResult').style.display = 'block';
+        });
+         
+        // Función para cargar el contenido de condigo.html
+         async function cargarContenidoSecundario() {
+            const response = await fetch('/index'); // Petición para obtener condigo.html
+            const data = await response.text(); // Obtener el texto del archivo
+            document.getElementById('contenido-secundario').innerHTML = data; // Insertar el contenido
+        }
+
+        // Llamar a la función para cargar el contenido
+        cargarContenidoSecundario();
+    </script>
+
+</body>
+</html>
+
+
+
+
+
