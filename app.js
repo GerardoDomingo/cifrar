@@ -20,6 +20,10 @@ app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
+// Servir condigo.html
+app.get('/descEscitala', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'descEscitala.html'));
+});
 // Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);

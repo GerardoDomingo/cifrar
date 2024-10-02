@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cifrado César y Escítala</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f4f8;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        .card {
+            background-color: #cce5ff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 390px;
+            margin-top: 20px;
+            color: #333;
+        }
+        h2 {
+            text-align: center;
+            font-size: 18px;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            background-color: #0056b3;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        @media (max-width: 500px) {
+            h2 {
+                font-size: 16px;
+            }
+            button {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>Cifrado César</h2>
+        <textarea id="mensajeCesar" placeholder="Ingresa el mensaje"></textarea>
+        <input type="number" id="desplazamiento" placeholder="Desplazamiento" min="0" value="0">
+        <button onclick="manejarCifradoCesar('cifrar')">Cifrar</button>
+        <button onclick="manejarCifradoCesar('descifrar')">Descifrar</button>
+        <h2>Resultado:</h2>
+        <textarea id="resultadoCesar" readonly></textarea>
+        <button onclick="copiarAlPortapapeles('resultadoCesar')">Copiar</button>
+    </div>
+
+    <div class="card">
+        <h2>Cifrado Escítala</h2>
+        <textarea id="mensajeEscitala" placeholder="Ingresa el mensaje"></textarea>
+        <input type="number" id="numColumnas" placeholder="Número de Columnas" min="2" value="2">
+        <button onclick="manejarCifradoEscitala('cifrar')">Cifrar</button>
+        <button onclick="manejarCifradoEscitala('descifrar')">Descifrar</button>
+        <h2>Resultado:</h2>
+        <textarea id="resultadoEscitala" readonly></textarea>
+        <button onclick="copiarAlPortapapeles('resultadoEscitala')">Copiar</button>
+    </div>
+</div>
+
+<script>
+    const cifrarCesar = (texto, desplazamiento) => {
+        const cifrado = texto.split('').map((char) => {
+            const codigo = char.charCodeAt(0);
+            if (codigo >= 65 && codigo <= 90) {
+                return String.fromCharCode(((codigo - 65 + parseInt(desplazamiento)) % 26) + 65);
+            }
+            if (codigo >= 97 && codigo <= 122) {
+                return String.fromCharCode(((codigo - 97 + parseInt(desplazamiento)) % 26) + 97);
+            }
+            return char;
+        });
+        return cifrado.join('');
+    };
+
+    const descifrarCesar = (texto, desplazamiento) => {
+        return cifrarCesar(texto, -desplazamiento);
+    };
+
+    const manejarCifradoCesar = (accion) => {
+        const mensaje = document.getElementById('mensajeCesar').value;
+        const desplazamiento = document.getElementById('desplazamiento').value;
+        const resultado = accion === 'cifrar' ? cifrarCesar(mensaje, desplazamiento) : descifrarCesar(mensaje, desplazamiento);
+        document.getElementById('resultadoCesar').value = resultado;
+    };
+
+    const cifrarEscitala = (texto, columnas) => {
+        const n = Math.ceil(texto.length / columnas);
+        let resultado = '';
+        for (let col = 0; col < columnas; col++) {
+            for (let row = 0; row < n; row++) {
+                const index = row * columnas + col;
+                if (index < texto.length) {
+                    resultado += texto[index];
+                }
+            }
+        }
+        return resultado;
+    };
+
+    const descifrarEscitala = (texto, columnas) => {
+        const n = Math.ceil(texto.length / columnas);
+        let resultado = '';
+        const matriz = Array.from({ length: n }, () => Array(columnas).fill(''));
+        let index = 0;
+
+        for (let col = 0; col < columnas; col++) {
+            for (let row = 0; row < n; row++) {
+                if (index < texto.length) {
+                    matriz[row][col] = texto[index++];
+                }
+            }
+        }
+
+        for (let row = 0; row < n; row++) {
+            for (let col = 0; col < columnas; col++) {
+                if (matriz[row][col]) {
+                    resultado += matriz[row][col];
+                }
+            }
+        }
+
+        return resultado.trim();
+    };
+
+    const manejarCifradoEscitala = (accion) => {
+        const mensaje = document.getElementById('mensajeEscitala').value;
+        const columnas = document.getElementById('numColumnas').value;
+        const resultado = accion === 'cifrar' ? cifrarEscitala(mensaje, columnas) : descifrarEscitala(mensaje, columnas);
+        document.getElementById('resultadoEscitala').value = resultado;
+    };
+
+    const copiarAlPortapapeles = (id) => {
+        const resultado = document.getElementById(id).value;
+        navigator.clipboard.writeText(resultado)
+            .then(() => alert('Texto copiado al portapapeles!'))
+            .catch(err => alert('Error al copiar: ', err));
+    };
+</script>
+
+</body>
+</html>
